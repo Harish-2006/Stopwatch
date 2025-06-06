@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stopwatch</title>
+  <style>
+    :root {
+      --primary-color: #6c63ff;     /* Soft blue-purple */
+      --accent-color: #8e7cff;      /* Lighter variation */
+      --background-gradient: linear-gradient(135deg, #1e1e2f, #2c2c44, #1f2937);
+      --text-color: #ffffff;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--background-gradient);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite, fadeIn 1s ease-in;
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      padding: 20px 40px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .controls button {
+      padding: 12px 25px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .controls button:hover {
+      background-color: var(--accent-color);
+      transform: scale(1.05);
+    }
+
+    .laps {
+      width: 100%;
+      max-width: 400px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 15px;
+      padding: 15px;
+      overflow-y: auto;
+      max-height: 300px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .lap-item {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 1rem;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @media (max-width: 500px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      .controls button {
+        flex: 1 1 40%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="display">00:00:00</h1>
+
+  <div class="controls">
+    <button onclick="startStopwatch()">Start</button>
+    <button onclick="pauseStopwatch()">Pause</button>
+    <button onclick="resetStopwatch()">Reset</button>
+    <button onclick="recordLap()">Lap</button>
+  </div>
+
+  <div class="laps" id="laps"></div>
+
+  <script>
+    let startTime, interval, elapsedTime = 0;
+    let isRunning = false;
+
+    function updateDisplay() {
+      const time = Date.now() - startTime + elapsedTime;
+      const date = new Date(time);
+      const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+      const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+      const milliseconds = String(Math.floor(date.getUTCMilliseconds() / 10)).padStart(2, '0');
+      document.getElementById('display').textContent = `${minutes}:${seconds}:${milliseconds}`;
+    }
+
+    function startStopwatch() {
+      if (!isRunning) {
+        startTime = Date.now();
+        interval = setInterval(updateDisplay, 10);
+        isRunning = true;
+      }
+    }
+
+    function pauseStopwatch() {
+      if (isRunning) {
+        clearInterval(interval);
+        elapsedTime += Date.now() - startTime;
+        isRunning = false;
+      }
+    }
+
+    function resetStopwatch() {
+      clearInterval(interval);
+      isRunning = false;
+      elapsedTime = 0;
+      document.getElementById('display').textContent = '00:00:00';
+      document.getElementById('laps').innerHTML = '';
+    }
+
+    function recordLap() {
+      if (isRunning) {
+        const lapTime = document.getElementById('display').textContent;
+        const lap = document.createElement('div');
+        lap.className = 'lap-item';
+        lap.textContent = `Lap: ${lapTime}`;
+        document.getElementById('laps').appendChild(lap);
+      }
+    }
+  </script>
+
+</body>
+</html>
